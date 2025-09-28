@@ -8,8 +8,13 @@ services:
     ports:
       - "8000:8000"
     environment:
-      # Required: Add your Google AI API key
+      # AI Model Configuration - Choose one
+      - AI_MODEL_TYPE=${AI_MODEL_TYPE:-gemini}  # Default to gemini, use 'ollama' for Ollama
+      # For Google Gemini (when AI_MODEL_TYPE=gemini)
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      # For Ollama (when AI_MODEL_TYPE=ollama) - Connect to host Ollama server
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      - OLLAMA_MODEL_NAME=${OLLAMA_MODEL_NAME:-llava:latest}
       # Optional: Proxy configuration
       - SCRAPER_PROXIES=${SCRAPER_PROXIES:-[]}
     volumes:
@@ -23,6 +28,9 @@ services:
     # Security options for running browsers
     security_opt:
       - seccomp:unconfined
+    # Add host.docker.internal for accessing host services (like Ollama)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/"]
       interval: 30s

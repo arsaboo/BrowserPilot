@@ -1,16 +1,15 @@
 import os
 import base64
-import google.generativeai as genai
 import json
 import asyncio
 import functools
 from PIL import Image
 import io
+from backend.model_selector import get_model
 
 class AntiBotVisionModel:
     def __init__(self):
-        genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-        self.model = genai.GenerativeModel("gemini-2.5-flash-preview-05-20")
+        self.model = get_model()
     
     async def analyze_anti_bot_page(self, screenshot_b64: str, detection_prompt: str, page_url: str) -> dict:
         """Analyze page screenshot to detect anti-bot systems"""
@@ -27,11 +26,7 @@ class AntiBotVisionModel:
             content = [detection_prompt, image]
             
             # Send to vision model
-            response = await asyncio.to_thread(
-                functools.partial(self.model.generate_content, content)
-            )
-            
-            raw_text = response.text
+            raw_text = await self.model.generate_content(content)
             print(f"🔍 Anti-bot detection response: {raw_text[:200]}...")
             
             # Parse JSON response
@@ -130,11 +125,7 @@ class AntiBotVisionModel:
             
             content = [captcha_prompt, image]
             
-            response = await asyncio.to_thread(
-                functools.partial(self.model.generate_content, content)
-            )
-            
-            raw_text = response.text
+            raw_text = await self.model.generate_content(content)
             
             # Parse response
             try:

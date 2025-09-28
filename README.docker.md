@@ -47,8 +47,16 @@ docker run -d \
 Set these environment variables for the container:
 
 ```bash
-# Required
+# Required - Choose one of the following AI models
+AI_MODEL_TYPE=gemini      # Use Google Gemini (default)
+# AI_MODEL_TYPE=ollama    # Use Ollama (requires OLLAMA_BASE_URL)
+
+# For Google Gemini (when AI_MODEL_TYPE=gemini)
 GOOGLE_API_KEY=your_gemini_api_key_here
+
+# For Ollama (when AI_MODEL_TYPE=ollama)
+OLLAMA_BASE_URL=http://host.docker.internal:11434    # Ollama server URL (host.docker.internal for Docker access)
+OLLAMA_MODEL_NAME=llava:latest                         # Vision model to use
 
 # Optional - Proxy configuration
 SCRAPER_PROXIES='[{"server": "http://proxy1:port", "username": "user", "password": "pass"}]'

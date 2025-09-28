@@ -2,7 +2,6 @@ import json
 import asyncio
 import functools
 from typing import Dict, Any, List, Optional
-import google.generativeai as genai
 from backend.browser_controller import BrowserController
 import base64
 from bs4 import BeautifulSoup
@@ -12,8 +11,10 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from pathlib import Path
 import re
+from backend.model_selector import get_model
 
-MODEL = genai.GenerativeModel("gemini-2.5-flash-preview-05-20")
+# Get model based on environment configuration
+MODEL = get_model()
 
 UNIVERSAL_EXTRACTION_PROMPT = """
 You are a universal data extraction specialist. Your task is to analyze any webpage and extract the most relevant information based on the user's specific goal.
@@ -227,12 +228,7 @@ class UniversalExtractor:
                 content=content
             )
             
-            response = await asyncio.to_thread(
-                functools.partial(MODEL.generate_content, prompt)
-            )
-            
-            # Parse AI response
-            raw_text = response.text
+            raw_text = await MODEL.generate_content([prompt])
             
             # Extract JSON from response
             start = raw_text.find('{')

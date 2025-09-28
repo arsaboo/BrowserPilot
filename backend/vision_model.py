@@ -1,17 +1,17 @@
 import os
 import base64
-import google.generativeai as genai
 from dotenv import load_dotenv
 import json
 import asyncio
 import functools
 from PIL import Image
 import io
+from backend.model_selector import get_model
 
 load_dotenv()
 
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-MODEL = genai.GenerativeModel("gemini-2.5-flash-preview-05-20")
+# Get model based on environment configuration
+MODEL = get_model()
 
 # Universal system prompt - works for ANY website
 SYSTEM_PROMPT = """
@@ -153,14 +153,9 @@ Consider the website type and adapt your strategy accordingly.
         content = [SYSTEM_PROMPT, prompt, compressed_image]
 
         # Count tokens and send request
-        token_count_response = await asyncio.to_thread(
-            functools.partial(MODEL.count_tokens, content)
-        )
-        input_tokens = token_count_response.total_tokens
+        input_tokens = await MODEL.count_tokens(content)
 
-        response = await asyncio.to_thread(
-            functools.partial(MODEL.generate_content, content)
-        )
+        raw_text = await MODEL.generate_content(content)
 
         raw_text = response.text
         response_tokens = await count_response_tokens(raw_text)
@@ -297,10 +292,9 @@ def extract_search_query(goal: str) -> str:
 async def count_response_tokens(response_text: str) -> int:
     """Count tokens in the response text"""
     try:
-        token_count_response = await asyncio.to_thread(
-            functools.partial(MODEL.count_tokens, response_text)
-        )
-        return token_count_response.total_tokens
+        # For response text, we need to pass it as content for token counting
+        # Since the response is just text, we can count its length
+        return len(response_text) // 4
     except Exception as e:
         print(f"❌ Error counting response tokens: {e}")
         return len(response_text) // 4

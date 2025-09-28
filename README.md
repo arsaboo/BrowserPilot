@@ -198,8 +198,16 @@ Just talk to it naturally:
 
 ### Environment Variables
 ```bash
-# Required
+# Required - Choose one of the following AI models
+AI_MODEL_TYPE=gemini      # Use Google Gemini (default)
+# AI_MODEL_TYPE=ollama    # Use Ollama (requires OLLAMA_BASE_URL)
+
+# For Google Gemini (when AI_MODEL_TYPE=gemini)
 GOOGLE_API_KEY=your_gemini_api_key_here
+
+# For Ollama (when AI_MODEL_TYPE=ollama)
+OLLAMA_BASE_URL=http://localhost:11434    # Default Ollama server URL
+OLLAMA_MODEL_NAME=llava:latest            # Default vision model
 
 # Optional
 SCRAPER_PROXIES=your_proxy_configuration
